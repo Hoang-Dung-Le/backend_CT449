@@ -11,10 +11,11 @@ let home = async (req, res) => {
 let dang_ky_khach_hang = async (req, res) => {
     try {
         let khach_hang = {
-            hoten_kh: req.body.hoten_kh,
-            matkhau: req.body.matkhau,
+            hoten_kh: req.body.hotenKH,
+            matkhau: req.body.password,
+            email: req.body.email,
             diachi: req.body.diachi,
-            sdt: req.body.sdt
+            sdt: req.body.sodt
         };
 
         let collection = (await db).db('pt_web_backend').collection('KhachHang');
