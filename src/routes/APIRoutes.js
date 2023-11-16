@@ -1,11 +1,11 @@
 import express from "express";
-import APIControllers from '../controllers/APIControllers'
+import { APIControllers } from '../controllers/APIControllers.js'
 let router = express.Router();
 
 const initAPIRoutes = (app) => {
     router.get('/home', APIControllers.home)
-
-    return app.use("/api/v1/", router)
+    router.post('/dang_ky_khach_hang', APIControllers.dang_ky_khach_hang)
+    return app.use("/api", router)
 }
 
 // module.exports = {
