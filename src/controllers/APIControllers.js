@@ -39,11 +39,9 @@ let get_all_khach_hang = async (req, res) => {
         })
     } catch (err) {
         return res.status(500).json({
-            error: errr.message
+            error: err.message
         })
     }
-
-
 }
 
 
