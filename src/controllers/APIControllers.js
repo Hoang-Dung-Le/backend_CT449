@@ -1,12 +1,6 @@
 import db from "../config/db.js"
+import Database_mongo from "../config/config_name.js"
 
-
-let home = async (req, res) => {
-    db
-    return res.status(200).json({
-        "msg": "ok"
-    })
-}
 
 let dang_ky_khach_hang = async (req, res) => {
     try {
@@ -18,7 +12,7 @@ let dang_ky_khach_hang = async (req, res) => {
             sdt: req.body.sodt
         };
 
-        let collection = (await db).db('pt_web_backend').collection('KhachHang');
+        let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_KhachHang);
 
         await collection.insertOne(khach_hang);
 
@@ -36,7 +30,23 @@ let dang_ky_khach_hang = async (req, res) => {
     }
 };
 
+let get_all_khach_hang = async (req, res) => {
+    try {
+        let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_KhachHang);
+        let allKhachHang = await collection.find({}).toArray();
+        return res.status(200).json({
+            ds: allKhachHang
+        })
+    } catch (err) {
+        return res.status(500).json({
+            error: errr.message
+        })
+    }
+
+
+}
+
 
 export const APIControllers = {
-    home, dang_ky_khach_hang
+    dang_ky_khach_hang, get_all_khach_hang
 }

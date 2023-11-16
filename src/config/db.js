@@ -1,8 +1,10 @@
 import { MongoClient } from "mongodb";
 // Replace the uri string with your connection string.
 // Create a connection string
-const connectionString = "mongodb://localhost:27017/pt_web_backend";
 
+import Database_mongo from "./config_name.js"
+
+const connectionString = Database_mongo.mongdb_host + Database_mongo.database_name;
 // Create a MongoClient object
 const client = new MongoClient(connectionString);
 
