@@ -48,7 +48,7 @@ let get_all_khach_hang = async (req, res) => {
 let thay_doi_thong_tin_khach_hang = async (req, res) => {
     try {
         let { _id, hotenKH, email, diachi, sodt } = req.body;
-        console.log("íisisisi",_id)
+        console.log("íisisisi", _id)
         // Kiểm tra xem có thiếu thông tin cần thiết không
         if (!_id || !hotenKH || !email || !diachi || !sodt) {
             return res.status(400).json({ message: "Thiếu thông tin cần thiết" });
@@ -169,6 +169,7 @@ let dang_ky_nhan_vien = async (req, res) => {
             sodt: req.body.sodt
         };
 
+<<<<<<< HEAD
         let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_NhanVien);
 
         await collection.insertOne(nhan_vien);
@@ -286,6 +287,8 @@ let xoa_nhan_vien = async (req, res) => {
     }
 }
 
+=======
+>>>>>>> b12fba9 (+ upload sp)
 export const APIControllers = {
     dang_ky_khach_hang, 
     dang_nhap_khach_hang,
