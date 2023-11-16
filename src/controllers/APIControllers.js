@@ -5,11 +5,11 @@ import Database_mongo from "../config/config_name.js"
 let dang_ky_khach_hang = async (req, res) => {
     try {
         let khach_hang = {
-            hoten_kh: req.body.hotenKH,
-            matkhau: req.body.password,
+            hotenKH: req.body.hotenKH,
+            password: req.body.password,
             email: req.body.email,
             diachi: req.body.diachi,
-            sdt: req.body.sodt
+            sodt: req.body.sodt
         };
 
         let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_KhachHang);
