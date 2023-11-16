@@ -10,6 +10,8 @@ app.use(bodyParser.json())
 
 const port = process.env.PORT;
 
+configViewEngine(app);
+
 initAPIRoutes(app); // gọi hàm này để khởi tạo các routes 
 
 app.listen(port, () => {

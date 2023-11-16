@@ -48,7 +48,7 @@ let get_all_khach_hang = async (req, res) => {
 let thay_doi_thong_tin_khach_hang = async (req, res) => {
     try {
         let { _id, hotenKH, email, diachi, sodt } = req.body;
-        console.log("íisisisi",_id)
+        console.log("íisisisi", _id)
         // Kiểm tra xem có thiếu thông tin cần thiết không
         if (!_id || !hotenKH || !email || !diachi || !sodt) {
             return res.status(400).json({ message: "Thiếu thông tin cần thiết" });
@@ -156,8 +156,6 @@ let dang_nhap_khach_hang = async (req, res) => {
         return res.status(500).json({ message: "Lỗi server khi đăng nhập" });
     }
 }
-
-
 
 
 export const APIControllers = {
