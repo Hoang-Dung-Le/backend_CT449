@@ -169,7 +169,6 @@ let dang_ky_nhan_vien = async (req, res) => {
             sodt: req.body.sodt
         };
 
-<<<<<<< HEAD
         let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_NhanVien);
 
         await collection.insertOne(nhan_vien);
@@ -287,8 +286,6 @@ let xoa_nhan_vien = async (req, res) => {
     }
 }
 
-=======
->>>>>>> b12fba9 (+ upload sp)
 export const APIControllers = {
     dang_ky_khach_hang, 
     dang_nhap_khach_hang,
