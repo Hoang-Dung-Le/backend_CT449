@@ -204,7 +204,7 @@ let get_all_nhan_vien = async (req, res) => {
 let thay_doi_thong_tin_nhan_vien = async (req, res) => {
     try {
         let { _id, hotenKH, email, diachi, sodt } = req.body;
-        console.log("íisisisi",_id)
+        console.log("íisisisi", _id)
         // Kiểm tra xem có thiếu thông tin cần thiết không
         if (!_id || !hotenKH || !email || !diachi || !sodt) {
             return res.status(400).json({ message: "Thiếu thông tin cần thiết" });
@@ -287,15 +287,15 @@ let xoa_nhan_vien = async (req, res) => {
 }
 
 export const APIControllers = {
-    dang_ky_khach_hang, 
+    dang_ky_khach_hang,
     dang_nhap_khach_hang,
-    get_all_khach_hang, 
+    get_all_khach_hang,
     thay_doi_thong_tin_khach_hang,
-    thong_tin_mot_khach_hang, 
-    xoa_khach_hang, 
-    dang_ky_nhan_vien, 
-    get_all_nhan_vien, 
+    thong_tin_mot_khach_hang,
+    xoa_khach_hang,
+    dang_ky_nhan_vien,
+    get_all_nhan_vien,
     thay_doi_thong_tin_nhan_vien,
-    thong_tin_mot_nhan_vien, 
-    xoa_nhan_vien, 
+    thong_tin_mot_nhan_vien,
+    xoa_nhan_vien,
 }
