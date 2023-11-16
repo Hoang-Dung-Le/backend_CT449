@@ -48,7 +48,7 @@ let get_all_khach_hang = async (req, res) => {
 let thay_doi_thong_tin_khach_hang = async (req, res) => {
     try {
         let { _id, hotenKH, email, diachi, sodt } = req.body;
-
+        console.log("íisisisi",_id)
         // Kiểm tra xem có thiếu thông tin cần thiết không
         if (!_id || !hotenKH || !email || !diachi || !sodt) {
             return res.status(400).json({ message: "Thiếu thông tin cần thiết" });
@@ -57,17 +57,14 @@ let thay_doi_thong_tin_khach_hang = async (req, res) => {
         // Kết nối tới database và collection
         const collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_KhachHang);
 
+        const objectId = new ObjectId(_id);
+
         // Cập nhật thông tin khách hàng
         const result = await collection.updateOne(
-            { _id: _id }, // Điều kiện tìm kiếm theo _id
+            { _id: objectId }, // Điều kiện tìm kiếm theo _id
             { $set: { hotenKH: hotenKH, email: email, diachi: diachi, sodt: sodt } } // Thông tin cần cập nhật
         );
 
-        if (result.modifiedCount > 0) {
-            return res.status(200).json({ message: "Cập nhật thông tin khách hàng thành công" });
-        } else {
-            return res.status(404).json({ message: "Không tìm thấy khách hàng để cập nhật" });
-        }
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Lỗi server khi cập nhật thông tin khách hàng" });
@@ -108,18 +105,19 @@ let thong_tin_mot_khach_hang = async (req, res) => {
 
 let xoa_khach_hang = async (req, res) => {
     try {
-        let _id = req.body._id;
-
+        let _id = req.params._id;
         // Kiểm tra xem _id có tồn tại không
         if (!_id) {
             return res.status(400).json({ message: "Thiếu thông tin _id của khách hàng" });
         }
 
+        const objectId = new ObjectId(_id);
+
         // Kết nối tới database và collection
         const collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_KhachHang);
 
         // Xóa khách hàng dựa vào _id
-        const result = await collection.deleteOne({ _id: _id });
+        const result = await collection.deleteOne({ _id: objectId });
 
         if (result.deletedCount > 0) {
             return res.status(200).json({ message: "Xóa khách hàng thành công" });
