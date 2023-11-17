@@ -5,6 +5,8 @@ class Database_mongo {
     static collection_NhanVien = "NhanVien"
     static collection_SanPham = "SanPham"
     static collection_HinhAnhSanPham = "HinhAnhSanPham"
+    static collection_DonHang = "DonHang"
+    static collection_GioHang = "GioHang"
 }
 
 export default Database_mongo

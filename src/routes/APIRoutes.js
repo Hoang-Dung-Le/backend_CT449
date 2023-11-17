@@ -22,6 +22,8 @@ const initAPIRoutes = (app) => {
     router.delete('/xoa_nhan_vien/:_id', APIControllers.xoa_nhan_vien)
 
     router.get('/get_all_san_pham', APIControllers.get_all_san_pham)
+
+    router.post('/dat_hang', APIControllers.dat_hang)
     let filename = ""
 
 
