@@ -1,6 +1,8 @@
 import db from "../config/db.js"
 import Database_mongo from "../config/config_name.js"
 import { ObjectId } from "mongodb";
+import jwt from 'jsonwebtoken';
+import 'dotenv/config'
 
 /* Khách hàng */
 let dang_ky_khach_hang = async (req, res) => {
@@ -130,6 +132,34 @@ let xoa_khach_hang = async (req, res) => {
     }
 }
 
+// let dang_nhap_khach_hang = async (req, res) => {
+//     try {
+//         let { email, password } = req.body;
+
+//         // Kiểm tra xem có thiếu thông tin đăng nhập không
+//         if (!email || !password) {
+//             return res.status(400).json({ message: "Vui lòng cung cấp email và mật khẩu" });
+//         }
+
+//         // Kết nối tới database và collection chứa thông tin khách hàng
+//         const collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_KhachHang);
+
+//         // Tìm kiếm thông tin khách hàng với email và mật khẩu cung cấp
+//         const khachHang = await collection.findOne({ email: email, password: password });
+
+//         if (khachHang) {
+//             // Nếu thông tin đăng nhập chính xác, trả về thông tin khách hàng
+//             return res.status(200).json(khachHang);
+//         } else {
+//             return res.status(401).json({ message: "Email hoặc mật khẩu không chính xác" });
+//         }
+//     } catch (err) {
+//         console.error(err);
+//         return res.status(500).json({ message: "Lỗi server khi đăng nhập" });
+//     }
+// }
+
+
 let dang_nhap_khach_hang = async (req, res) => {
     try {
         let { email, password } = req.body;
@@ -146,8 +176,12 @@ let dang_nhap_khach_hang = async (req, res) => {
         const khachHang = await collection.findOne({ email: email, password: password });
 
         if (khachHang) {
-            // Nếu thông tin đăng nhập chính xác, trả về thông tin khách hàng
-            return res.status(200).json(khachHang);
+
+            // Nếu thông tin đăng nhập chính xác, tạo token và trả về cho người dùng
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3000s' });
+
+            // Trả về token trong response
+            return res.status(200).json({ token: token, khachhang: khachHang });
         } else {
             return res.status(401).json({ message: "Email hoặc mật khẩu không chính xác" });
         }
@@ -291,7 +325,7 @@ let get_all_san_pham = async (req, res) => {
     try {
         let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_SanPham, Database_mongo.collection_HinhAnhSanPham);
         let allSanPham = await collection.find({}).toArray();
-        
+
         console.log(allSanPham)
         return res.status(200).json({
             ds: allSanPham

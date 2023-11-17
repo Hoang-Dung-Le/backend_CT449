@@ -4,15 +4,17 @@ let router = express.Router();
 import db from "../config/db.js"
 import multer from "multer";
 import Database_mongo from "../config/config_name.js";
+import 'dotenv/config'
+import authenticateToken from "../middlewares/jwt.js"
 
 const initAPIRoutes = (app) => {
-    router.get('/get_all_khach_hang', APIControllers.get_all_khach_hang)
-    router.put('/thay_doi_thong_tin_khach_hang', APIControllers.thay_doi_thong_tin_khach_hang)
+    router.get('/get_all_khach_hang', authenticateToken, APIControllers.get_all_khach_hang)
+    router.put('/thay_doi_thong_tin_khach_hang', authenticateToken, APIControllers.thay_doi_thong_tin_khach_hang)
     router.get('/thong_tin_mot_khach_hang/:_id', APIControllers.thong_tin_mot_khach_hang)
     router.delete('/xoa_khach_hang/:_id', APIControllers.xoa_khach_hang)
     router.post('/dang_ky_khach_hang', APIControllers.dang_ky_khach_hang)
     router.post('/dang_nhap_khach_hang', APIControllers.dang_nhap_khach_hang)
-   
+
     router.post('/dang_ky_nhan_vien', APIControllers.dang_ky_nhan_vien)
     router.get('/get_all_nhan_vien', APIControllers.get_all_nhan_vien)
     router.put('/thay_doi_thong_tin_nhan_vien', APIControllers.thay_doi_thong_tin_nhan_vien)
@@ -75,6 +77,9 @@ const initAPIRoutes = (app) => {
             res.status(500).json({ message: 'Lỗi server' });
         }
     });
+
+
+
     return app.use("/api", router)
 }
 
