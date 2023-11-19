@@ -19,10 +19,10 @@ const initAPIRoutes = (app) => {
     router.get('/thong_tin_mot_nhan_vien/:_id', APIControllers.thong_tin_mot_nhan_vien)
     router.delete('/xoa_nhan_vien/:_id', APIControllers.xoa_nhan_vien)
 
+    /* Sản phẩm */
     router.get('/get_all_san_pham', APIControllers.get_all_san_pham)
+    
     let filename = ""
-
-
     const storage = multer.diskStorage({
         destination: './src/public/images',
         filename: (req, file, cb) => {

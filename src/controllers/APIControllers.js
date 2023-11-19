@@ -287,21 +287,58 @@ let xoa_nhan_vien = async (req, res) => {
 }
 
 /* Sản phẩm */
+// let get_all_san_pham = async (req, res) => {
+//     try {
+//         let collectionSP = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_SanPham);
+//         let collectionHH = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_HinhAnhSanPham);
+                
+//         let allSanPham = await collectionNV.find({}).toArray();
+
+        
+//         console.log(allSanPham)
+//         return res.status(200).json({
+//             ds: allSanPham
+//         })
+//     } catch (err) {
+//         return res.status(500).json({
+//             error: err.message
+//         })
+//     }
+// }
+
 let get_all_san_pham = async (req, res) => {
     try {
-        let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_SanPham, Database_mongo.collection_HinhAnhSanPham);
-        let allSanPham = await collection.find({}).toArray();
-        
-        console.log(allSanPham)
+        let collectionSP = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_SanPham);
+        let collectionHH = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_HinhAnhSanPham);
+                
+        // Lấy tất cả sản phẩm
+        let allSanPham = await collectionSP.find({}).toArray();
+
+        // Duyệt qua danh sách sản phẩm
+        for (let i = 0; i < allSanPham.length; i++) {
+            const sanPham = allSanPham[i];
+
+            // Lấy danh sách hình ảnh cho mỗi sản phẩm
+            const danhSachHinhAnh = await collectionHH.find({ id_sanpham: sanPham._id}).toArray();
+            console.log("danhSachHinhAnh: ", danhSachHinhAnh.ten_anh);
+
+            // Gán danh sách hình ảnh vào thuộc tính 'hinhanh' của sản phẩm
+            // sanPham.ten_anh = danhSachHinhAnh;
+            // allSanPham.ten_anh = danhSachHinhAnh
+            sanPham['ten_anh'] = danhSachHinhAnh[0]['ten_anh']
+        }
+
+        console.log("Tatats ca san pham", allSanPham);
         return res.status(200).json({
             ds: allSanPham
-        })
+        });
     } catch (err) {
         return res.status(500).json({
             error: err.message
-        })
+        });
     }
 }
+
 
 export const APIControllers = {
     dang_ky_khach_hang,
