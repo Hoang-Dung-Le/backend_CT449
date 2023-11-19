@@ -1,6 +1,8 @@
 import db from "../config/db.js"
 import Database_mongo from "../config/config_name.js"
 import { ObjectId } from "mongodb";
+import jwt from 'jsonwebtoken';
+import 'dotenv/config'
 
 /* Khách hàng */
 let dang_ky_khach_hang = async (req, res) => {
@@ -130,6 +132,34 @@ let xoa_khach_hang = async (req, res) => {
     }
 }
 
+// let dang_nhap_khach_hang = async (req, res) => {
+//     try {
+//         let { email, password } = req.body;
+
+//         // Kiểm tra xem có thiếu thông tin đăng nhập không
+//         if (!email || !password) {
+//             return res.status(400).json({ message: "Vui lòng cung cấp email và mật khẩu" });
+//         }
+
+//         // Kết nối tới database và collection chứa thông tin khách hàng
+//         const collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_KhachHang);
+
+//         // Tìm kiếm thông tin khách hàng với email và mật khẩu cung cấp
+//         const khachHang = await collection.findOne({ email: email, password: password });
+
+//         if (khachHang) {
+//             // Nếu thông tin đăng nhập chính xác, trả về thông tin khách hàng
+//             return res.status(200).json(khachHang);
+//         } else {
+//             return res.status(401).json({ message: "Email hoặc mật khẩu không chính xác" });
+//         }
+//     } catch (err) {
+//         console.error(err);
+//         return res.status(500).json({ message: "Lỗi server khi đăng nhập" });
+//     }
+// }
+
+
 let dang_nhap_khach_hang = async (req, res) => {
     try {
         let { email, password } = req.body;
@@ -146,8 +176,12 @@ let dang_nhap_khach_hang = async (req, res) => {
         const khachHang = await collection.findOne({ email: email, password: password });
 
         if (khachHang) {
-            // Nếu thông tin đăng nhập chính xác, trả về thông tin khách hàng
-            return res.status(200).json(khachHang);
+
+            // Nếu thông tin đăng nhập chính xác, tạo token và trả về cho người dùng
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3000s' });
+
+            // Trả về token trong response
+            return res.status(200).json({ token: token, khachhang: khachHang });
         } else {
             return res.status(401).json({ message: "Email hoặc mật khẩu không chính xác" });
         }
@@ -328,7 +362,11 @@ let get_all_san_pham = async (req, res) => {
             sanPham['ten_anh'] = danhSachHinhAnh[0]['ten_anh']
         }
 
-        console.log("Tatats ca san pham", allSanPham);
+        // console.log("Tatats ca san pham", allSanPham);
+        // let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_SanPham, Database_mongo.collection_HinhAnhSanPham);
+        // let allSanPham = await collection.find({}).toArray();
+
+        console.log(allSanPham)
         return res.status(200).json({
             ds: allSanPham
         });
@@ -339,6 +377,266 @@ let get_all_san_pham = async (req, res) => {
     }
 }
 
+let lay_1_san_pham = async (req, res) => {
+    try {
+        let id_sanpham = req.params.id_sanpham;
+        const collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_SanPham);
+
+        // Lấy thông tin sản phẩm
+        let san_pham = await collection.findOne({ _id: new ObjectId(id_sanpham) });
+
+        if (!san_pham) {
+            return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
+        }
+
+        const collection_HinhAnhSanPham = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_HinhAnhSanPham);
+
+        // Lấy danh sách tên ảnh của sản phẩm
+        let danh_sach_ten_anh = await collection_HinhAnhSanPham.find({ id_sanpham: new ObjectId(id_sanpham) }, { _id: 0, id_sanpham: 0, ten_anh: 1 }).toArray();
+
+        // Gắn danh sách ảnh vào thông tin sản phẩm
+        san_pham['danh_sach_anh'] = danh_sach_ten_anh;
+
+        return res.status(200).json({ san_pham: san_pham });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Lỗi server khi lấy thông tin sản phẩm" });
+    }
+}
+
+let xoa_san_pham = async (req, res) => {
+    try {
+        let id_sanpham = req.params.id_sanpham;
+        const collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_SanPham);
+
+        const result = await collection.deleteOne({ _id: new ObjectId(id_sanpham) });
+
+        if (result.deletedCount === 1) {
+            return res.status(200).json({ message: "Đã xóa sản phẩm thành công" });
+        } else {
+            return res.status(404).json({ message: "Không tìm thấy sản phẩm để xóa" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Lỗi server khi xóa sản phẩm" });
+    }
+}
+
+let cap_nhat_san_pham = async (req, res) => {
+    try {
+        let { id_sanpham, TenHH, MoTaHH, Gia, SoLuongHang, GhiChu } = req.body;
+        const collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_SanPham);
+
+        const result = await collection.updateOne(
+            { _id: new ObjectId(id_sanpham) },
+            {
+                $set: {
+                    TenHH: TenHH,
+                    MoTaHH: MoTaHH,
+                    Gia: Gia,
+                    SoLuongHang: SoLuongHang,
+                    GhiChu: GhiChu
+                }
+            }
+        );
+
+        if (result.modifiedCount === 1) {
+            return res.status(200).json({ message: "Đã cập nhật thông tin sản phẩm thành công" });
+        } else {
+            return res.status(404).json({ message: "Không tìm thấy sản phẩm để cập nhật" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Lỗi server khi cập nhật sản phẩm" });
+    }
+}
+
+
+
+
+let dat_hang = async (req, res) => {
+    /*
+        id_khach_hang: dung123
+        danh_sach_san_pham: [
+            {
+                id_san_pham_1: 1,
+                so_luong: 2
+            },
+            {
+                id_san_pham_2: 2,
+                so_luong: 1
+            }
+        ]
+        thoi_gian_dat,
+        ..
+        trang thai: chua_xac_nhan|da_xac_nhan|dang_giao_hang|hoan_thanh|that_bai|da_huy
+    */
+
+    try {
+        let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_DonHang);
+        const thoi_gian_dat = new Date();
+        don_hang = {
+            id_khach_hang: req.body.id_khach_hang,
+            danh_sach_san_pham: req.body.danh_sach_san_pham,
+            thanh_tien: thanh_tien,
+            thoi_gian_dat: thoi_gian_dat,
+            trang_thai: "chua_xac_nhan",
+        }
+        const result = await collection.insertOne(don_hang);
+        if (result.insertedCount === 1) {
+            return res.status(200).json({ message: "Đặt hàng thành công", don_hang: don_hang });
+        } else {
+            return res.status(500).json({ message: "Lỗi khi đặt hàng" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Lỗi server khi đặt hàng" });
+    }
+
+}
+
+let them_gio_hang = async (req, res) => {
+    try {
+        let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_GioHang);
+        let { id_khach_hang, id_sanpham } = req.body;
+
+        let gio_hang = {
+            id_khach_hang: id_khach_hang,
+            id_sanpham: id_sanpham
+        };
+
+        const result = await collection.insertOne(gio_hang);
+
+        if (result.insertedCount === 1) {
+            return res.status(200).json({ message: "Thêm vào giỏ hàng thành công", gio_hang: gio_hang });
+        } else {
+            return res.status(500).json({ message: "Lỗi khi thêm vào giỏ hàng" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Lỗi server khi thêm vào giỏ hàng" });
+    }
+}
+
+
+let lay_gio_hang = async (req, res) => {
+    try {
+        let id_khach_hang = req.body.id_khach_hang;
+        let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_GioHang);
+
+        let danh_sach_san_pham = await collection.find({ id_khach_hang: id_khach_hang }, { projection: { _id: 0, id_khach_hang: 0 } }).toArray();
+
+        if (danh_sach_san_pham.length > 0) {
+            return res.status(200).json({ message: "Danh sách sản phẩm trong giỏ hàng", danh_sach_san_pham: danh_sach_san_pham });
+        } else {
+            return res.status(404).json({ message: "Không tìm thấy sản phẩm trong giỏ hàng" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Lỗi server khi lấy danh sách sản phẩm trong giỏ hàng" });
+    }
+}
+
+
+let xem_trang_thai_don_hang = async (req, res) => {
+    try {
+        let id_don_hang = req.body.id_don_hang;
+        let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_DonHang);
+
+        let don_hang = await collection.findOne({ _id: ObjectId(id_don_hang) });
+
+        if (don_hang) {
+            return res.status(200).json({ message: "Thông tin đơn hàng", don_hang: don_hang });
+        } else {
+            return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Lỗi server khi xem trạng thái đơn hàng" });
+    }
+}
+
+
+// let huy_don_hang = async (req, res) => {
+//     try {
+//         let id_don_hang = req.body.id_don_hang;
+//         let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_DonHang);
+
+//         const result = await collection.updateOne(
+//             { _id: ObjectId(id_don_hang) },
+//             { $set: { trang_thai: "da_huy" } }
+//         );
+
+//         if (result.modifiedCount === 1) {
+//             return res.status(200).json({ message: "Đã hủy đơn hàng thành công" });
+//         } else {
+//             return res.status(404).json({ message: "Không tìm thấy đơn hàng để hủy" });
+//         }
+//     } catch (err) {
+//         console.error(err);
+//         return res.status(500).json({ message: "Lỗi server khi hủy đơn hàng" });
+//     }
+// }
+
+
+let danh_sach_don_hang_mot_khach_hang = async (req, res) => {
+    try {
+        let id_khach_hang = req.body.id_khach_hang;
+        let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_DonHang);
+
+        let danh_sach_don_hang = await collection.find({ id_khach_hang: id_khach_hang }).toArray();
+
+        if (danh_sach_don_hang.length > 0) {
+            return res.status(200).json({ message: "Danh sách đơn hàng của khách hàng", danh_sach_don_hang: danh_sach_don_hang });
+        } else {
+            return res.status(404).json({ message: "Không tìm thấy đơn hàng nào của khách hàng này" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Lỗi server khi lấy danh sách đơn hàng của khách hàng" });
+    }
+}
+
+
+let danh_sach_don_hang = async (req, res) => {
+    try {
+        let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_DonHang);
+
+        let all_don_hang = await collection.find({}).toArray();
+
+        if (all_don_hang.length > 0) {
+            return res.status(200).json({ message: "Danh sách tất cả đơn hàng", all_don_hang: all_don_hang });
+        } else {
+            return res.status(404).json({ message: "Không tìm thấy đơn hàng nào" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Lỗi server khi lấy danh sách đơn hàng" });
+    }
+}
+
+
+let cap_nhat_trang_thai_don_hang = async (req, res) => {
+    try {
+        let id_don_hang = req.body.id_don_hang;
+        let trang_thai_moi = req.body.trang_thai_moi
+        let collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_DonHang);
+
+        const result = await collection.updateOne(
+            { _id: ObjectId(id_don_hang) },
+            { $set: { trang_thai: trang_thai_moi } }
+        );
+
+        if (result.modifiedCount === 1) {
+            return res.status(200).json({ message: "Đã hủy đơn hàng thành công" });
+        } else {
+            return res.status(404).json({ message: "Không tìm thấy đơn hàng để hủy" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Lỗi server khi hủy đơn hàng" });
+    }
+}
 
 export const APIControllers = {
     dang_ky_khach_hang,
@@ -355,4 +653,16 @@ export const APIControllers = {
     xoa_nhan_vien,
 
     get_all_san_pham,
+    lay_1_san_pham,
+    xoa_san_pham,
+    cap_nhat_san_pham,
+
+    dat_hang,
+    them_gio_hang,
+    lay_gio_hang,
+    xem_trang_thai_don_hang,
+    // huy_don_hang,
+    danh_sach_don_hang,
+    cap_nhat_trang_thai_don_hang,
+    danh_sach_don_hang_mot_khach_hang
 }
