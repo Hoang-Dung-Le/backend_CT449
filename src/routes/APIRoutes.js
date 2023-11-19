@@ -22,6 +22,9 @@ const initAPIRoutes = (app) => {
     router.delete('/xoa_nhan_vien/:_id', APIControllers.xoa_nhan_vien)
 
     router.get('/get_all_san_pham', APIControllers.get_all_san_pham)
+    router.get('/lay_1_san_pham/:id_sanpham', APIControllers.lay_1_san_pham)
+    router.delete('/xoa_san_pham', APIControllers.xoa_san_pham)
+    router.put('/cap_nhat_san_pham', APIControllers.cap_nhat_san_pham)
 
     router.post('/dat_hang', APIControllers.dat_hang)
     let filename = ""
@@ -42,7 +45,6 @@ const initAPIRoutes = (app) => {
 
     router.post('/uploadfile', upload.array('images', 5), async (req, res) => {
         let { TenHH, MoTaHH, Gia, SoLuongHang, GhiChu } = req.body;
-
         let san_pham = {
             TenHH: TenHH,
             MoTaHH: MoTaHH,
@@ -51,6 +53,7 @@ const initAPIRoutes = (app) => {
             GhiChu: GhiChu,
         };
 
+        console.log(san_pham)
         let collectionSanPham = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_SanPham);
         let collectionImages = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_HinhAnhSanPham);
 
@@ -75,7 +78,7 @@ const initAPIRoutes = (app) => {
 
             res.status(200).json({ message: 'Upload sản phẩm thành công' });
         } catch (error) {
-            console.error(error);
+            console.error(error.message);
             res.status(500).json({ message: 'Lỗi server' });
         }
     });

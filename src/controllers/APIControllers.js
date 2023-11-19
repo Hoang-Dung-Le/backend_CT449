@@ -337,6 +337,82 @@ let get_all_san_pham = async (req, res) => {
     }
 }
 
+let lay_1_san_pham = async (req, res) => {
+    try {
+        let id_sanpham = req.params.id_sanpham;
+        const collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_SanPham);
+
+        // Lấy thông tin sản phẩm
+        let san_pham = await collection.findOne({ _id: new ObjectId(id_sanpham) });
+
+        if (!san_pham) {
+            return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
+        }
+
+        const collection_HinhAnhSanPham = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_HinhAnhSanPham);
+
+        // Lấy danh sách tên ảnh của sản phẩm
+        let danh_sach_ten_anh = await collection_HinhAnhSanPham.find({ id_sanpham: new ObjectId(id_sanpham) }, { _id: 0, id_sanpham: 0, ten_anh: 1 }).toArray();
+
+        // Gắn danh sách ảnh vào thông tin sản phẩm
+        san_pham['danh_sach_anh'] = danh_sach_ten_anh;
+
+        return res.status(200).json({ san_pham: san_pham });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Lỗi server khi lấy thông tin sản phẩm" });
+    }
+}
+
+let xoa_san_pham = async (req, res) => {
+    try {
+        let id_sanpham = req.params.id_sanpham;
+        const collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_SanPham);
+
+        const result = await collection.deleteOne({ _id: new ObjectId(id_sanpham) });
+
+        if (result.deletedCount === 1) {
+            return res.status(200).json({ message: "Đã xóa sản phẩm thành công" });
+        } else {
+            return res.status(404).json({ message: "Không tìm thấy sản phẩm để xóa" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Lỗi server khi xóa sản phẩm" });
+    }
+}
+
+let cap_nhat_san_pham = async (req, res) => {
+    try {
+        let { id_sanpham, TenHH, MoTaHH, Gia, SoLuongHang, GhiChu } = req.body;
+        const collection = (await db).db(Database_mongo.database_name).collection(Database_mongo.collection_SanPham);
+
+        const result = await collection.updateOne(
+            { _id: new ObjectId(id_sanpham) },
+            {
+                $set: {
+                    TenHH: TenHH,
+                    MoTaHH: MoTaHH,
+                    Gia: Gia,
+                    SoLuongHang: SoLuongHang,
+                    GhiChu: GhiChu
+                }
+            }
+        );
+
+        if (result.modifiedCount === 1) {
+            return res.status(200).json({ message: "Đã cập nhật thông tin sản phẩm thành công" });
+        } else {
+            return res.status(404).json({ message: "Không tìm thấy sản phẩm để cập nhật" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Lỗi server khi cập nhật sản phẩm" });
+    }
+}
+
+
+
 
 let dat_hang = async (req, res) => {
     /*
@@ -537,6 +613,9 @@ export const APIControllers = {
     xoa_nhan_vien,
 
     get_all_san_pham,
+    lay_1_san_pham,
+    xoa_san_pham,
+    cap_nhat_san_pham,
 
     dat_hang,
     them_gio_hang,
